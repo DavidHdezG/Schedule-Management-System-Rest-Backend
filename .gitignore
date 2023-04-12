@@ -1,0 +1,5 @@
+.venv
+.git
+prod-ca-2021.crt
+__pycache__
+db.sqlite3
