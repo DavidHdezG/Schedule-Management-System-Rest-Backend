@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
-  title: ''
-  version: ''
+  title: 'Schedule Management System Backend'
+  version: '1.6'
 paths:
   /career/:
     get:
@@ -219,6 +219,27 @@ paths:
           description: ''
       tags:
       - token
+  /logout/:
+    post:
+      operationId: createLogout
+      description: ''
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema: {}
+          application/x-www-form-urlencoded:
+            schema: {}
+          multipart/form-data:
+            schema: {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: {}
+          description: ''
+      tags:
+      - logout
 components:
   schemas:
     Career:
