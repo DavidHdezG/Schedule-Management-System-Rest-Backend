@@ -6,6 +6,10 @@ from rest_framework.views import APIView
 from rest_framework import generics
 # Create your views here.
 from rest_framework import permissions
+
+
+    
+    
 class StudentSignup(generics.GenericAPIView):
     serializer_class = StudentSignupSerializer
     #permission_classes=[permissions.IsAuthenticated]
@@ -35,6 +39,7 @@ class TeacherSignup(generics.GenericAPIView):
         
 class CareerView(generics.GenericAPIView):
     serializer_class = CareerSerializer
+    queryset = Career.objects.all()
     def get(self, request):
         careers = Career.objects.all()
         serializer = CareerSerializer(careers, many=True)
@@ -64,6 +69,7 @@ class StudentView(APIView):
     
                         
 class SubjectView(generics.GenericAPIView):
+    queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
     def get(self, request):
         subjects = Subject.objects.all()
