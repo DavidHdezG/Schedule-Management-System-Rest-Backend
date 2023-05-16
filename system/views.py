@@ -4,13 +4,13 @@ from .models import *
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
-# Create your views here.
-from rest_framework import permissions
+from .permissions import *
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
+from rest_framework import status
 
-
-    
-    
 class StudentSignup(generics.GenericAPIView):
+    permission_classes=[IsSuperUser]
     serializer_class = StudentSignupSerializer
     #permission_classes=[permissions.IsAuthenticated]
     def post(self, request, *args, **kwargs):
@@ -24,6 +24,7 @@ class StudentSignup(generics.GenericAPIView):
         })
         
 class TeacherSignup(generics.GenericAPIView):
+    permission_classes=[IsSuperUser]
     serializer_class = TeacherSignupSerializer
     
     def post(self, request, *args, **kwargs):
@@ -38,6 +39,7 @@ class TeacherSignup(generics.GenericAPIView):
         
         
 class CareerView(generics.GenericAPIView):
+    permission_classes=[IsSuperUser]
     serializer_class = CareerSerializer
     queryset = Career.objects.all()
     def get(self, request):
@@ -56,12 +58,14 @@ class CareerView(generics.GenericAPIView):
 
 
 class TeacherView(APIView):
+    permission_classes=[IsSuperUser]
     def get(self, request):
         teachers = Teacher.objects.all()
         serializer = TeacherSerializer(teachers, many=True)
         return Response(serializer.data)
     
 class StudentView(APIView):
+    permission_classes=[IsSuperUser]
     def get(self, request):
         students = Student.objects.all()
         serializer = StudentSerializer(students, many=True)
@@ -69,6 +73,7 @@ class StudentView(APIView):
     
                         
 class SubjectView(generics.GenericAPIView):
+    permission_classes=[IsSuperUser]
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
     def get(self, request):
@@ -84,3 +89,13 @@ class SubjectView(generics.GenericAPIView):
             "subject": SubjectSerializer(subject, context=self.get_serializer_context()).data,
             "message": "Subject Created Successfully."
         })          
+        
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+    def post(self, request):
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+        return Response(status=status.HTTP_205_RESET_CONTENT)
