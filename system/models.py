@@ -23,7 +23,7 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None):
         if not username:
-            raise ValueError('Users must have an username')
+            raise ValueError('Users must have an id')
         user = self.model(
             username = username
         )
@@ -80,3 +80,33 @@ class Admin(models.Model):
     user= models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     def __str__(self):
         return self.username
+    
+    
+class Classroom(models.Model):
+    id=models.CharField(max_length=5,primary_key=True,unique=True)
+    name=models.CharField(max_length=50)
+    capacity=models.IntegerField()
+    
+    def __str__(self):
+        return self.name
+
+class Enrollment(models.Model):
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return str(self.course.id) + ' - ' + str(self.student.user.username)
+
+class Course(models.Model):
+    id=models.CharField(max_length=5,primary_key=True,unique=True)
+    subject=models.ForeignKey(Subject, on_delete=models.CASCADE)
+    schedule=models.DateField()
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
+    career = models.ForeignKey(Career, on_delete=models.CASCADE)
+    semester = models.IntegerField()
+    classroom = models.ForeignKey(Classroom, on_delete=models.CASCADE)
+    min_students = models.IntegerField()
+    student = models.ManyToManyField(Student, through='Enrollment')
+    
+    def __str__(self):
+        return str(self.id)

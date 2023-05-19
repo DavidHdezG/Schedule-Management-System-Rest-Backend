@@ -16,23 +16,7 @@ def generate_password():
     characters = string.ascii_letters+string.digits
     password = ''.join(random.choice(characters) for i in range(8))
     return password
-def newId(user_role):
-    if user_role == 1:
-        lastId = User.objects.all().filter(is_student=True).order_by('username').last()
-        if lastId is not None:
-            lastId = int(lastId.username[2:])
-            newId = str(lastId + 1).zfill(8)
-        else:
-            newId = "00000001"
-        return "al" + newId
-    else:
-        lastId = User.objects.all().filter(is_teacher=True).order_by('username').last()
-        if lastId is not None:
-            lastId = int(lastId.username[2:])
-            newId = str(lastId + 1).zfill(8)
-        else:
-            newId = "00000001"
-        return "nm" + newId
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -138,4 +122,27 @@ class CareerSerializer(serializers.ModelSerializer):
         }
         
         
+class ClassroomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Classroom
+        fields = ('id', 'name','capacity')
+        extra_kwargs = {
+            'id': {'required': True},
+            'name': {'required': True},
+            'capacity': {'required': True},
+        }
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Enrollment
+        fields = ('id', 'student','course')
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'student': {'required': True},
+            'course': {'required': True},
+        }
         
+class CourseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ("__all__")

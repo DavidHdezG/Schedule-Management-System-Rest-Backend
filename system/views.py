@@ -56,6 +56,10 @@ class CareerView(generics.GenericAPIView):
             "message": "Career Created Successfully."
         })
 
+class CareerDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Career.objects.all()
+    serializer_class = CareerSerializer
 
 class TeacherView(APIView):
     permission_classes=[IsSuperUser]
@@ -63,14 +67,23 @@ class TeacherView(APIView):
         teachers = Teacher.objects.all()
         serializer = TeacherSerializer(teachers, many=True)
         return Response(serializer.data)
-    
+class TeacherDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsSuperUser,IsTeacher]
+    queryset = Teacher.objects.all()
+    serializer_class = TeacherSerializer
+
+
 class StudentView(APIView):
     permission_classes=[IsSuperUser]
     def get(self, request):
         students = Student.objects.all()
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
-    
+
+class StudentDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer    
                         
 class SubjectView(generics.GenericAPIView):
     permission_classes=[IsSuperUser]
@@ -89,8 +102,78 @@ class SubjectView(generics.GenericAPIView):
             "subject": SubjectSerializer(subject, context=self.get_serializer_context()).data,
             "message": "Subject Created Successfully."
         })          
-        
 
+class SubjectDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Subject.objects.all()
+    serializer_class = SubjectSerializer
+        
+class ClassroomView(generics.GenericAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer
+    
+    def get(self, request):
+        classrooms = Classroom.objects.all()
+        serializer = ClassroomSerializer(classrooms, many=True)
+        return Response(serializer.data)
+    
+    def post(self,request,*args,**kwargs):
+        serializers = self.get_serializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        classroom = serializers.save()
+        return Response({
+            "subject": ClassroomSerializer(classroom, context=self.get_serializer_context()).data,
+            "message": "Classroom Created Successfully."
+        })
+
+class ClassroomDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Classroom.objects.all()
+    serializer_class = ClassroomSerializer
+    
+    
+    
+class EnrollmentView(generics.GenericAPIView):
+    permission_classes=[IsSuperUser]
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer
+    
+    def get(self, request):
+        enrollment = Enrollment.objects.all()
+        serializer = EnrollmentSerializer(enrollment, many=True)
+        return Response(serializer.data)
+
+class EnrollmentDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsSuperUser]
+    queryset = Enrollment.objects.all()
+    serializer_class = EnrollmentSerializer   
+    
+class CourseView(generics.GenericAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset=Course.objects.all()
+    serializer_class=CourseSerializer
+    
+    def get(self,request):
+        course = Course.objects.all()
+        serializer = CourseSerializer(course, many=True)
+        return Response(serializer.data)
+    def post(self,request,*args,**kwargs):
+        serializers = self.get_serializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        course = serializers.save()
+        return Response({
+            "course": CourseSerializer(course, context=self.get_serializer_context()).data,
+            "message": "Course Created Successfully."
+        })
+
+
+class CourseDetailView(generics.RetrieveAPIView):
+    permission_classes=[IsAuthenticated]
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+    
+     
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request):
