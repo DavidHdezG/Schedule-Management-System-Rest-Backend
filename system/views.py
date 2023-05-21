@@ -9,44 +9,47 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.tokens import OutstandingToken, BlacklistedToken
 from rest_framework import status
 
+
 class StudentSignup(generics.GenericAPIView):
-    permission_classes=[IsSuperUser]
+    ermission_classes=[IsSuperUser]
     serializer_class = StudentSignupSerializer
-    #permission_classes=[permissions.IsAuthenticated]
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user=serializer.save()
+        user = serializer.save()
         user = user.user
         return Response({
-            "user":UserSerializer(user, context=self.get_serializer_context()).data,
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "message": "Student Created Successfully.  Now perform Login to get your token"
         })
-        
+
+
 class TeacherSignup(generics.GenericAPIView):
     permission_classes=[IsSuperUser]
     serializer_class = TeacherSignupSerializer
-    
+
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user=serializer.save()
+        user = serializer.save()
         user = user.user
         return Response({
-            "user":UserSerializer(user, context=self.get_serializer_context()).data,
+            "user": UserSerializer(user, context=self.get_serializer_context()).data,
             "message": "Teacher Created Successfully.  Now perform Login to get your token"
         })
-        
-        
+
+
 class CareerView(generics.GenericAPIView):
     permission_classes=[IsSuperUser]
     serializer_class = CareerSerializer
     queryset = Career.objects.all()
+
     def get(self, request):
         careers = Career.objects.all()
         serializer = CareerSerializer(careers, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, *args, **kwargs):
         serializers = self.get_serializer(data=request.data)
         serializers.is_valid(raise_exception=True)
@@ -56,10 +59,12 @@ class CareerView(generics.GenericAPIView):
             "message": "Career Created Successfully."
         })
 
+
 class CareerDetailView(generics.RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Career.objects.all()
     serializer_class = CareerSerializer
+
 
 class TeacherView(APIView):
     permission_classes=[IsSuperUser]
@@ -67,6 +72,8 @@ class TeacherView(APIView):
         teachers = Teacher.objects.all()
         serializer = TeacherSerializer(teachers, many=True)
         return Response(serializer.data)
+
+
 class TeacherDetailView(generics.RetrieveAPIView):
     permission_classes=[IsSuperUser,IsTeacher]
     queryset = Teacher.objects.all()
@@ -80,20 +87,23 @@ class StudentView(APIView):
         serializer = StudentSerializer(students, many=True)
         return Response(serializer.data)
 
+
 class StudentDetailView(generics.RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Student.objects.all()
-    serializer_class = StudentSerializer    
-                        
+    serializer_class = StudentSerializer
+
+
 class SubjectView(generics.GenericAPIView):
     permission_classes=[IsSuperUser]
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
+
     def get(self, request):
         subjects = Subject.objects.all()
         serializer = SubjectSerializer(subjects, many=True)
         return Response(serializer.data)
-    
+
     def post(self, request, *args, **kwargs):
         serializers = self.get_serializer(data=request.data)
         serializers.is_valid(raise_exception=True)
@@ -101,24 +111,26 @@ class SubjectView(generics.GenericAPIView):
         return Response({
             "subject": SubjectSerializer(subject, context=self.get_serializer_context()).data,
             "message": "Subject Created Successfully."
-        })          
+        })
+
 
 class SubjectDetailView(generics.RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Subject.objects.all()
     serializer_class = SubjectSerializer
-        
+
+
 class ClassroomView(generics.GenericAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
-    
+
     def get(self, request):
         classrooms = Classroom.objects.all()
         serializer = ClassroomSerializer(classrooms, many=True)
         return Response(serializer.data)
-    
-    def post(self,request,*args,**kwargs):
+
+    def post(self, request, *args, **kwargs):
         serializers = self.get_serializer(data=request.data)
         serializers.is_valid(raise_exception=True)
         classroom = serializers.save()
@@ -127,41 +139,51 @@ class ClassroomView(generics.GenericAPIView):
             "message": "Classroom Created Successfully."
         })
 
+
 class ClassroomDetailView(generics.RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Classroom.objects.all()
     serializer_class = ClassroomSerializer
-    
-    
-    
+
+
 class EnrollmentView(generics.GenericAPIView):
     permission_classes=[IsSuperUser]
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
-    
+
     def get(self, request):
         enrollment = Enrollment.objects.all()
         serializer = EnrollmentSerializer(enrollment, many=True)
         return Response(serializer.data)
 
+
 class EnrollmentDetailView(generics.RetrieveAPIView):
     permission_classes=[IsSuperUser]
     queryset = Enrollment.objects.all()
-    serializer_class = EnrollmentSerializer   
-    
+    serializer_class = EnrollmentSerializer
+
+
 class CourseView(generics.GenericAPIView):
     permission_classes=[IsAuthenticated]
-    queryset=Course.objects.all()
-    serializer_class=CourseSerializer
-    
-    def get(self,request):
+    queryset = Course.objects.all()
+    serializer_class = CourseSerializer
+
+    def get(self, request):
         course = Course.objects.all()
         serializer = CourseSerializer(course, many=True)
         return Response(serializer.data)
-    def post(self,request,*args,**kwargs):
+
+    def post(self, request, *args, **kwargs):
         serializers = self.get_serializer(data=request.data)
         serializers.is_valid(raise_exception=True)
-        course = serializers.save()
+        serializers.save()
+        course = Course.objects.get(id=serializers.data['id'])
+        user = User.objects.get(id=request.user.id)
+        student = Student.objects.get(user=user)
+        course.student.add(student)
+
+        schedule = Schedule.objects.get(id=request.data['schedule'])
+        course.schedule.add(schedule)
         return Response({
             "course": CourseSerializer(course, context=self.get_serializer_context()).data,
             "message": "Course Created Successfully."
@@ -172,8 +194,27 @@ class CourseDetailView(generics.RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
-    
-     
+
+
+class ScheduleView(generics.GenericAPIView):
+    queryset = Schedule.objects.all()
+    serializer_class = ScheduleSerializer
+
+    def get(self, request):
+        schedule = Schedule.objects.all()
+        serializer = ScheduleSerializer(schedule, many=True)
+        return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializers = self.get_serializer(data=request.data)
+        serializers.is_valid(raise_exception=True)
+        schedule = serializers.save()
+        return Response({
+            "schedule": ScheduleSerializer(schedule, context=self.get_serializer_context()).data,
+            "message": "Schedule Created Successfully."
+        })
+
+
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
     def post(self, request):
