@@ -13,7 +13,8 @@
 ## API Endpoints
 
 ## Documentation
-`/docs/` - CoreAPI documentation
+
+`/` - CoreAPI documentation
 
 ### User
 
